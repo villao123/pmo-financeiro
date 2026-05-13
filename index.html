@@ -104,6 +104,18 @@
   .saldo-bar-fill{height:8px;border-radius:4px;position:absolute;top:0;left:0;}
   .saldo-bar-limit{position:absolute;top:-4px;width:2px;height:16px;background:#fff;opacity:0.3;border-radius:1px;}
 
+  /* Tabela mensal */
+  .mensal-wrap{margin-top:16px;border-top:1px solid var(--border);padding-top:16px;}
+  .mensal-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+  .mensal-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .mensal-table th{padding:7px 12px;text-align:right;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);background:var(--surface2);}
+  .mensal-table th:first-child{text-align:left;}
+  .mensal-table td{padding:7px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted2);}
+  .mensal-table td:first-child{text-align:left;color:var(--text);font-weight:500;}
+  .mensal-table tr:last-child td{border-bottom:none;font-weight:700;color:var(--text);background:rgba(0,181,174,0.05);}
+  .mensal-table td.val-zero{color:var(--muted);}
+  .mensal-table td.val-pos{color:#6ee7b7;}
+
   .empty-state{padding:60px 24px;text-align:center;}
   .empty-state .icon{font-size:36px;margin-bottom:12px;opacity:0.4;}
   .empty-state p{color:var(--muted2);font-size:14px;}
@@ -227,6 +239,27 @@
     document.getElementById('badge-ok').textContent = ok;
   }
 
+  function renderTabelaMensal(previsto_mensal) {
+    if (!previsto_mensal || previsto_mensal.length === 0) return '';
+    const total = previsto_mensal.reduce((s, m) => s + (m.valor || 0), 0);
+    const linhas = previsto_mensal.map(m => {
+      const v = m.valor || 0;
+      const cls = v === 0 ? 'val-zero' : 'val-pos';
+      return `<tr><td>${m.mes}</td><td class="${cls}">${fmt(v)}</td></tr>`;
+    }).join('');
+    return `
+      <div class="mensal-wrap">
+        <div class="mensal-title">Projeção de Custos — Próximos 6 Meses</div>
+        <table class="mensal-table">
+          <thead><tr><th>Mês</th><th>Previsto</th></tr></thead>
+          <tbody>
+            ${linhas}
+            <tr><td>Total</td><td>${fmt(total)}</td></tr>
+          </tbody>
+        </table>
+      </div>`;
+  }
+
   function renderProjetos() {
     const el = document.getElementById('proj-list');
     const busca = document.getElementById('busca').value.toLowerCase();
@@ -247,7 +280,6 @@
       const dotColor = p.estouro ? 'var(--danger)' : p.percentual >= 80 ? 'var(--warning)' : 'var(--success)';
       const pct = Math.min(p.percentual, 150);
       const barWidth = Math.min(pct, 100);
-      const nomeEsc = (p.nome||p.id).replace(/'/g,"\\'");
       const saldo = p.saldo;
 
       return `<div class="projeto-row ${p.estouro?'estouro':''}">
@@ -283,6 +315,7 @@
               <div class="saldo-bar-limit" style="left:100%"></div>
             </div>
           </div>
+          ${renderTabelaMensal(p.previsto_mensal)}
         </div>
       </div>`;
     }).join('');
