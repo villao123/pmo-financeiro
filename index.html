@@ -3,180 +3,184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monitoramento Financeiro — DB Diagnósticos</title>
+<title>Monitoramento Financeiro — Grupo DB</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#07090f;--surface:#0f1623;--surface2:#162035;--border:#1e2d45;--border2:#253650;
-    --accent:#00b5ae;--danger:#ef4444;--warning:#f59e0b;--success:#10b981;
-    --text:#eef2ff;--muted:#4b6080;--muted2:#7a95b5;
+    --bg:#0a0c10;--surface:#111318;--surface2:#16191f;--border:#1c2128;--border2:#252c35;
+    --accent:#00e5a0;--accent2:#00b5ae;--danger:#ef4444;--warning:#f59e0b;--success:#00e5a0;
+    --text:#f0f4ff;--muted:#3d4f63;--muted2:#6b8299;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
-  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,181,174,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,181,174,0.02) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
-  .wrap{max-width:1400px;margin:0 auto;padding:0 40px;position:relative;z-index:1;}
+  .wrap{max-width:1440px;margin:0 auto;padding:0 32px;position:relative;}
 
-  header{padding:28px 0 24px;border-bottom:1px solid var(--border);margin-bottom:32px;}
-  .header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
-  .logo-area{display:flex;align-items:center;gap:14px;}
-  .logo-icon-text{width:42px;height:42px;background:linear-gradient(135deg,#00b5ae,#0891b2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0;}
-  .logo-text h1{font-size:18px;font-weight:700;letter-spacing:-0.3px;}
-  .logo-text p{font-size:11px;color:var(--muted2);letter-spacing:0.06em;text-transform:uppercase;margin-top:2px;}
-  .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .sync-info{font-size:12px;color:var(--muted2);display:flex;align-items:center;gap:6px;}
-  .dot{width:6px;height:6px;border-radius:50%;background:#10b981;animation:blink 2s ease-in-out infinite;}
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
-  .btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all 0.18s;white-space:nowrap;}
-  .btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2);}
-  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  header{display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border);margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+  .logo-area{display:flex;align-items:center;gap:12px;}
+  .logo-svg{width:36px;height:36px;flex-shrink:0;}
+  .logo-name{font-size:16px;font-weight:700;letter-spacing:-0.2px;color:var(--text);}
+  .logo-sub{font-size:10px;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+  .header-center{font-size:13px;font-weight:500;color:var(--muted2);letter-spacing:0.04em;text-transform:uppercase;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .sync-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--surface2);border:1px solid var(--border2);font-size:11px;color:var(--muted2);}
+  .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:blink 2s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+  .btn-refresh{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:transparent;border:1px solid var(--border2);color:var(--muted2);font-size:12px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+  .btn-refresh:hover{border-color:var(--accent);color:var(--accent);}
 
-  .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:16px;transition:border-color 0.2s;}
-  .stat-card:hover{border-color:var(--border2);}
-  .stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
-  .si-teal{background:rgba(0,181,174,0.12);}
-  .si-red{background:rgba(239,68,68,0.12);}
-  .si-yellow{background:rgba(245,158,11,0.12);}
-  .si-green{background:rgba(16,185,129,0.12);}
-  .stat-val{font-size:26px;font-weight:700;line-height:1;letter-spacing:-1px;}
-  .stat-val.teal{color:#2dd4bf;}.stat-val.red{color:#fca5a5;}.stat-val.yellow{color:#fcd34d;}.stat-val.green{color:#6ee7b7;}
-  .stat-label{font-size:12px;color:var(--muted2);margin-top:4px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px 20px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+  .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+  .stat-card.s-total::before{background:var(--accent2);}
+  .stat-card.s-danger::before{background:var(--danger);}
+  .stat-card.s-warn::before{background:var(--warning);}
+  .stat-card.s-ok::before{background:var(--accent);}
+  .stat-num{font-size:32px;font-weight:700;letter-spacing:-1.5px;line-height:1;margin-bottom:4px;}
+  .s-total .stat-num{color:var(--accent2);}
+  .s-danger .stat-num{color:#fca5a5;}
+  .s-warn .stat-num{color:#fcd34d;}
+  .s-ok .stat-num{color:var(--accent);}
+  .stat-lbl{font-size:11px;color:var(--muted2);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;}
 
-  .toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;}
-  .filter-tabs{display:flex;gap:6px;flex-wrap:wrap;}
-  .filter-tab{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;transition:all 0.15s;}
-  .filter-tab:hover{border-color:var(--accent);color:var(--accent);}
-  .filter-tab.active{background:rgba(0,181,174,0.1);border-color:var(--accent);color:var(--accent);}
-  .filter-tab.active-red{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.4);color:#fca5a5;}
-  .filter-tab.active-green{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.4);color:#6ee7b7;}
-  .badge-pill{padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700;background:rgba(255,255,255,0.08);}
-  .search-box{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:8px;background:var(--surface);border:1px solid var(--border2);min-width:240px;}
-  .search-box input{background:none;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;width:100%;}
-  .search-box input::placeholder{color:var(--muted);}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  .section-title{font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:8px;}
+  .count-badge{padding:2px 8px;border-radius:10px;background:rgba(0,229,160,0.1);border:1px solid rgba(0,229,160,0.2);color:var(--accent);font-size:10px;font-weight:700;}
+  .filter-tabs{display:flex;gap:5px;flex-wrap:wrap;}
+  .ftab{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;transition:all 0.15s;}
+  .ftab:hover{border-color:var(--accent);color:var(--accent);}
+  .ftab.active{background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.3);color:var(--accent);}
+  .ftab.active-red{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.3);color:#fca5a5;}
+  .ftab.active-green{background:rgba(0,229,160,0.08);border-color:rgba(0,229,160,0.3);color:var(--accent);}
+  .search-wrap{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:7px;background:var(--surface);border:1px solid var(--border2);min-width:220px;}
+  .search-wrap input{background:none;border:none;outline:none;color:var(--text);font-size:12px;font-family:'Inter',sans-serif;width:100%;}
+  .search-wrap input::placeholder{color:var(--muted);}
 
-  .projetos-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-  .table-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 120px 36px;padding:12px 24px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;gap:12px;}
+  .proj-table{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .tbl-head{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 130px 32px;padding:10px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;gap:12px;}
 
-  .projeto-row{border-bottom:1px solid var(--border);transition:background 0.12s,border-left 0.12s;border-left:3px solid transparent;}
-  .projeto-row:last-child{border-bottom:none;}
-  .projeto-row:nth-child(even){background:rgba(255,255,255,0.014);}
-  .projeto-row.open-row{background:rgba(0,181,174,0.04)!important;border-left-color:var(--accent);}
-  .projeto-row.estouro{border-left-color:var(--danger)!important;}
-  .projeto-main{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 120px 36px;align-items:center;padding:15px 24px;cursor:pointer;gap:12px;transition:background 0.12s;}
-  .projeto-main:hover{background:rgba(0,181,174,0.03);}
+  .proj-row{border-bottom:1px solid var(--border);border-left:2px solid transparent;transition:all 0.12s;}
+  .proj-row:last-child{border-bottom:none;}
+  .proj-row.r-danger{border-left-color:var(--danger);}
+  .proj-row.r-open{background:rgba(0,229,160,0.03)!important;border-left-color:var(--accent)!important;}
+  .proj-main{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 130px 32px;align-items:center;padding:14px 20px;cursor:pointer;gap:12px;transition:background 0.1s;}
+  .proj-main:hover{background:rgba(255,255,255,0.02);}
 
-  .projeto-nome{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:500;min-width:0;}
-  .projeto-nome span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .valor-cell{font-size:13px;font-weight:500;white-space:nowrap;}
-  .valor-cell.muted{color:var(--muted2);}
-  .valor-cell.ok{color:#6ee7b7;}
-  .valor-cell.alert{color:#fca5a5;}
-  .valor-cell.warn{color:#fcd34d;}
+  .proj-nome{display:flex;align-items:center;gap:10px;min-width:0;}
+  .proj-avatar{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff;}
+  .proj-nome-text{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .vcell{font-size:12px;font-weight:500;white-space:nowrap;color:var(--muted2);}
+  .vok{color:#6ee7b7;}.valert{color:#fca5a5;}.vwarn{color:#fcd34d;}
 
-  .progress-wrap{display:flex;flex-direction:column;gap:4px;}
-  .progress-label{font-size:11px;font-weight:600;}
-  .progress-label.ok{color:#6ee7b7;}
-  .progress-label.alert{color:#fca5a5;}
-  .progress-label.warn{color:#fcd34d;}
-  .progress-bar-bg{height:4px;background:var(--border2);border-radius:2px;width:100%;}
-  .progress-bar{height:4px;border-radius:2px;transition:width 0.8s ease;}
-  .progress-bar.ok{background:linear-gradient(90deg,#10b981,#34d399);}
-  .progress-bar.alert{background:linear-gradient(90deg,#ef4444,#f87171);}
-  .progress-bar.warn{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+  .pct-wrap{display:flex;flex-direction:column;gap:3px;}
+  .pct-lbl{font-size:11px;font-weight:700;}
+  .pct-lbl.ok{color:var(--accent);}.pct-lbl.alert{color:#fca5a5;}.pct-lbl.warn{color:#fcd34d;}
+  .pct-bar-bg{height:3px;background:var(--border2);border-radius:2px;}
+  .pct-bar{height:3px;border-radius:2px;}
+  .pct-bar.ok{background:var(--accent);}.pct-bar.alert{background:var(--danger);}.pct-bar.warn{background:var(--warning);}
 
-  .expand-btn{width:28px;height:28px;border-radius:6px;background:transparent;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;justify-self:center;}
-  .expand-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .expand-btn.open{transform:rotate(180deg);border-color:var(--accent);color:var(--accent);}
+  .exp-btn{width:26px;height:26px;border-radius:5px;background:transparent;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;justify-self:center;}
+  .exp-btn:hover,.exp-btn.open{border-color:var(--accent);color:var(--accent);}
+  .exp-btn.open{transform:rotate(180deg);}
 
-  .projeto-detalhe{display:none;padding:0 24px 20px;border-top:1px solid var(--border);}
-  .projeto-detalhe.open{display:block;animation:slideDown 0.2s ease both;}
-  @keyframes slideDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+  .proj-detail{display:none;padding:0 20px 18px;border-top:1px solid var(--border);}
+  .proj-detail.open{display:block;animation:sd 0.18s ease both;}
+  @keyframes sd{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
 
-  .detalhe-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;padding:18px 0 16px;}
-  .detalhe-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;}
-  .detalhe-val{font-size:14px;font-weight:600;}
-  .detalhe-val.ok{color:#6ee7b7;}.detalhe-val.alert{color:#fca5a5;}.detalhe-val.warn{color:#fcd34d;}.detalhe-val.muted{color:var(--muted2);}
+  .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:16px 0 14px;}
+  .dl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;}
+  .dv{font-size:13px;font-weight:600;color:var(--muted2);}
+  .dv.ok{color:#6ee7b7;}.dv.alert{color:#fca5a5;}.dv.warn{color:#fcd34d;}
 
-  .saldo-bar-wrap{padding:12px 0 16px;border-top:1px solid var(--border);margin-top:4px;}
-  .saldo-bar-label{font-size:11px;color:var(--muted2);margin-bottom:8px;}
-  .saldo-bar-bg{height:8px;background:var(--border2);border-radius:4px;position:relative;overflow:visible;}
-  .saldo-bar-fill{height:8px;border-radius:4px;position:absolute;top:0;left:0;}
-  .saldo-bar-limit{position:absolute;top:-4px;width:2px;height:16px;background:#fff;opacity:0.3;border-radius:1px;}
+  .uso-bar-wrap{padding:10px 0 14px;border-top:1px solid var(--border);}
+  .uso-bar-lbl{font-size:10px;color:var(--muted2);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+  .uso-bar-bg{height:6px;background:var(--border2);border-radius:3px;position:relative;}
+  .uso-bar-fill{height:6px;border-radius:3px;position:absolute;top:0;left:0;}
+  .uso-bar-mark{position:absolute;top:-3px;width:1px;height:12px;background:rgba(255,255,255,0.25);}
 
-  /* Tabela mensal */
-  .mensal-wrap{margin-top:16px;border-top:1px solid var(--border);padding-top:16px;}
-  .mensal-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
-  .mensal-table{width:100%;border-collapse:collapse;font-size:12px;}
-  .mensal-table th{padding:7px 12px;text-align:right;font-weight:600;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);background:var(--surface2);}
+  .mensal-wrap{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+  .mensal-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
+  .mensal-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .mensal-table th{padding:6px 10px;text-align:right;font-weight:700;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border);background:var(--surface2);}
   .mensal-table th:first-child{text-align:left;}
-  .mensal-table td{padding:7px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted2);}
-  .mensal-table td:first-child{text-align:left;color:var(--text);font-weight:500;}
-  .mensal-table tr:last-child td{border-bottom:none;font-weight:700;color:var(--text);background:rgba(0,181,174,0.05);}
-  .mensal-table td.val-zero{color:var(--muted);}
-  .mensal-table td.val-pos{color:#6ee7b7;}
+  .mensal-table td{padding:6px 10px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted2);}
+  .mensal-table td:first-child{text-align:left;color:var(--text);font-weight:600;}
+  .mensal-table tr:last-child td{border-bottom:none;font-weight:700;color:var(--accent);background:rgba(0,229,160,0.04);}
+  .mensal-table td.vzero{color:var(--muted);}
+  .mensal-table td.vpos{color:#6ee7b7;}
 
-  .empty-state{padding:60px 24px;text-align:center;}
-  .empty-state .icon{font-size:36px;margin-bottom:12px;opacity:0.4;}
-  .empty-state p{color:var(--muted2);font-size:14px;}
-  .loading{padding:52px 24px;text-align:center;color:var(--muted2);font-size:13px;display:flex;flex-direction:column;align-items:center;gap:14px;}
-  .spinner{width:28px;height:28px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+  .empty{padding:48px;text-align:center;color:var(--muted2);font-size:13px;}
+  .loading{padding:48px;text-align:center;color:var(--muted2);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .spinner{width:24px;height:24px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
-  #toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;background:var(--surface2);border:1px solid var(--border2);box-shadow:0 8px 30px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;pointer-events:none;}
-  #toast.show{transform:translateY(0);opacity:1;}
-  #toast.success{border-color:rgba(16,185,129,0.4);color:#6ee7b7;}
-  #toast.error{border-color:rgba(239,68,68,0.4);color:#fca5a5;}
-
   @media(max-width:900px){
-    .stats-strip{grid-template-columns:repeat(2,1fr);}
-    .table-header{display:none;}
-    .projeto-main{grid-template-columns:1fr 36px;}
-    .valor-cell,.progress-wrap{display:none;}
-    .wrap{padding:0 16px;}
+    .stats-row{grid-template-columns:repeat(2,1fr);}
+    .tbl-head{display:none;}
+    .proj-main{grid-template-columns:1fr 32px;}
+    .vcell,.pct-wrap{display:none;}
+    .wrap{padding:0 14px;}
+    .header-center{display:none;}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="header-inner">
-      <div class="logo-area">
-        <div class="logo-icon-text">DB</div>
-        <div class="logo-text">
-          <h1>Monitoramento Financeiro de Projetos</h1>
-          <p>DB Diagnósticos · PMO</p>
-        </div>
+    <div class="logo-area">
+      <svg class="logo-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="18" cy="18" r="18" fill="#111318"/>
+        <path d="M10 10h7c4.4 0 8 3.6 8 8s-3.6 8-8 8h-7V10z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+        <circle cx="23" cy="18" r="4" fill="none" stroke="white" stroke-width="2"/>
+      </svg>
+      <div>
+        <div class="logo-name">Grupo DB</div>
+        <div class="logo-sub">PMO · Financeiro</div>
       </div>
-      <div class="header-right">
-        <div class="sync-info"><div class="dot"></div> Última sync: <span id="ultima-sync">—</span></div>
-        <button class="btn btn-ghost" onclick="carregarDados()">🔄 Atualizar</button>
-      </div>
+    </div>
+    <div class="header-center">Monitoramento Financeiro de Projetos</div>
+    <div class="header-right">
+      <div class="sync-pill"><div class="dot"></div>Sync: <span id="ultima-sync">—</span></div>
+      <button class="btn-refresh" onclick="carregarDados()">🔄 Atualizar</button>
     </div>
   </header>
 
-  <div class="stats-strip">
-    <div class="stat-card"><div class="stat-icon si-teal">📁</div><div><div class="stat-val teal" id="stat-total">—</div><div class="stat-label">Projetos monitorados</div></div></div>
-    <div class="stat-card"><div class="stat-icon si-red">🚨</div><div><div class="stat-val red" id="stat-estouro">—</div><div class="stat-label">Com estouro de orçamento</div></div></div>
-    <div class="stat-card"><div class="stat-icon si-yellow">⚠️</div><div><div class="stat-val yellow" id="stat-atencao">—</div><div class="stat-label">Acima de 80% do orçado</div></div></div>
-    <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val green" id="stat-ok">—</div><div class="stat-label">Projetos saudáveis</div></div></div>
+  <div class="stats-row">
+    <div class="stat-card s-total">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-lbl">Projetos monitorados</div>
+    </div>
+    <div class="stat-card s-danger">
+      <div class="stat-num" id="stat-estouro">—</div>
+      <div class="stat-lbl">Com estouro</div>
+    </div>
+    <div class="stat-card s-warn">
+      <div class="stat-num" id="stat-atencao">—</div>
+      <div class="stat-lbl">Atenção &gt; 80%</div>
+    </div>
+    <div class="stat-card s-ok">
+      <div class="stat-num" id="stat-ok">—</div>
+      <div class="stat-lbl">Saudáveis</div>
+    </div>
   </div>
 
   <div class="toolbar">
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="filtrarTab(this,'todos')">Todos <span class="badge-pill" id="badge-todos">0</span></button>
-      <button class="filter-tab" onclick="filtrarTab(this,'estouro')">Estouro <span class="badge-pill" id="badge-estouro">0</span></button>
-      <button class="filter-tab" onclick="filtrarTab(this,'atencao')">Atenção <span class="badge-pill" id="badge-atencao">0</span></button>
-      <button class="filter-tab" onclick="filtrarTab(this,'ok')">Saudável <span class="badge-pill" id="badge-ok">0</span></button>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+      <div class="section-title">Projetos <span class="count-badge" id="badge-todos">0</span></div>
+      <div class="filter-tabs">
+        <button class="ftab active" onclick="filtrarTab(this,'todos')">Todos</button>
+        <button class="ftab" onclick="filtrarTab(this,'estouro')">Estouro <span id="badge-estouro">0</span></button>
+        <button class="ftab" onclick="filtrarTab(this,'atencao')">Atenção <span id="badge-atencao">0</span></button>
+        <button class="ftab" onclick="filtrarTab(this,'ok')">Saudável <span id="badge-ok">0</span></button>
+      </div>
     </div>
-    <div class="search-box">
-      <span style="color:var(--muted)">🔍</span>
+    <div class="search-wrap">
+      <span style="color:var(--muted);font-size:12px;">🔍</span>
       <input type="text" placeholder="Buscar projeto..." id="busca" oninput="renderProjetos()">
     </div>
   </div>
 
-  <div class="projetos-section">
-    <div class="table-header">
+  <div class="proj-table">
+    <div class="tbl-head">
       <div>Projeto</div>
       <div>Orçado Total</div>
       <div>Realizado</div>
@@ -189,163 +193,151 @@
   <div style="height:48px;"></div>
 </div>
 
-<div id="toast"></div>
-
 <script>
   const WORKER = 'https://pmo-financeiro.vitormanu-dl05.workers.dev';
   let todosAlertas = [];
   let filtroAtivo = 'todos';
+  const CORES = ['#00b5ae','#6366f1','#f59e0b','#ec4899','#8b5cf6','#0891b2','#10b981','#f97316','#06b6d4','#84cc16'];
+
+  function iniciais(nome) {
+    const p = (nome||'').replace('Projeto ','').split(' ');
+    return ((p[0]||'')[0]||'') + ((p[1]||'')[0]||'');
+  }
 
   function fmt(val) {
     if (!val && val !== 0) return 'R$ —';
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val);
+    return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(val);
   }
 
   async function carregarDados() {
     document.getElementById('proj-list').innerHTML = `<div class="loading"><div class="spinner"></div>Buscando dados...</div>`;
     try {
-      const [alertasRes, syncRes] = await Promise.all([
-        fetch(`${WORKER}/alertas`),
-        fetch(`${WORKER}/sync-info`)
-      ]);
-      todosAlertas = await alertasRes.json();
-      const syncInfo = await syncRes.json();
-
-      if (syncInfo.ultima_sync) {
-        const d = new Date(syncInfo.ultima_sync);
-        document.getElementById('ultima-sync').textContent = d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+      const [ar, sr] = await Promise.all([fetch(`${WORKER}/alertas`),fetch(`${WORKER}/sync-info`)]);
+      todosAlertas = await ar.json();
+      const si = await sr.json();
+      if (si.ultima_sync) {
+        const d = new Date(si.ultima_sync);
+        document.getElementById('ultima-sync').textContent = d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
       }
-
       atualizarStats();
       renderProjetos();
     } catch(e) {
-      document.getElementById('proj-list').innerHTML = `<div class="empty-state"><div class="icon">❌</div><p>Erro ao conectar com o Worker</p><small>Execute a macro no Excel para sincronizar os dados</small></div>`;
+      document.getElementById('proj-list').innerHTML = `<div class="empty">❌ Erro ao conectar. Execute a macro no Excel para sincronizar.</div>`;
     }
   }
 
   function atualizarStats() {
     const total = todosAlertas.length;
-    const estouro = todosAlertas.filter(p => p.estouro).length;
-    const atencao = todosAlertas.filter(p => !p.estouro && p.percentual >= 80).length;
-    const ok = todosAlertas.filter(p => !p.estouro && p.percentual < 80).length;
-
+    const est = todosAlertas.filter(p=>p.estouro).length;
+    const at = todosAlertas.filter(p=>!p.estouro&&p.percentual>=80).length;
+    const ok = todosAlertas.filter(p=>!p.estouro&&p.percentual<80).length;
     document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-estouro').textContent = estouro;
-    document.getElementById('stat-atencao').textContent = atencao;
+    document.getElementById('stat-estouro').textContent = est;
+    document.getElementById('stat-atencao').textContent = at;
     document.getElementById('stat-ok').textContent = ok;
     document.getElementById('badge-todos').textContent = total;
-    document.getElementById('badge-estouro').textContent = estouro;
-    document.getElementById('badge-atencao').textContent = atencao;
+    document.getElementById('badge-estouro').textContent = est;
+    document.getElementById('badge-atencao').textContent = at;
     document.getElementById('badge-ok').textContent = ok;
   }
 
-  function renderTabelaMensal(previsto_mensal) {
-    if (!previsto_mensal || previsto_mensal.length === 0) return '';
-    const total = previsto_mensal.reduce((s, m) => s + (m.valor || 0), 0);
-    const linhas = previsto_mensal.map(m => {
-      const v = m.valor || 0;
-      const cls = v === 0 ? 'val-zero' : 'val-pos';
-      return `<tr><td>${m.mes}</td><td class="${cls}">${fmt(v)}</td></tr>`;
+  function renderMensal(pm) {
+    if (!pm||pm.length===0) return '';
+    const total = pm.reduce((s,m)=>s+(m.valor||0),0);
+    const linhas = pm.map(m=>{
+      const v = m.valor||0;
+      return `<tr><td>${m.mes}</td><td class="${v===0?'vzero':'vpos'}">${fmt(v)}</td></tr>`;
     }).join('');
-    return `
-      <div class="mensal-wrap">
-        <div class="mensal-title">Projeção de Custos — Próximos 6 Meses</div>
-        <table class="mensal-table">
-          <thead><tr><th>Mês</th><th>Previsto</th></tr></thead>
-          <tbody>
-            ${linhas}
-            <tr><td>Total</td><td>${fmt(total)}</td></tr>
-          </tbody>
-        </table>
-      </div>`;
+    return `<div class="mensal-wrap">
+      <div class="mensal-title">Projeção — Próximos 6 Meses</div>
+      <table class="mensal-table">
+        <thead><tr><th>Mês</th><th>Previsto</th></tr></thead>
+        <tbody>${linhas}<tr><td>Total</td><td>${fmt(total)}</td></tr></tbody>
+      </table>
+    </div>`;
   }
 
   function renderProjetos() {
     const el = document.getElementById('proj-list');
     const busca = document.getElementById('busca').value.toLowerCase();
     let lista = [...todosAlertas];
+    if (filtroAtivo==='estouro') lista=lista.filter(p=>p.estouro);
+    else if (filtroAtivo==='atencao') lista=lista.filter(p=>!p.estouro&&p.percentual>=80);
+    else if (filtroAtivo==='ok') lista=lista.filter(p=>!p.estouro&&p.percentual<80);
+    if (busca) lista=lista.filter(p=>(p.nome||p.id).toLowerCase().includes(busca));
+    if (lista.length===0){el.innerHTML=`<div class="empty">📁 Nenhum projeto encontrado</div>`;return;}
 
-    if (filtroAtivo === 'estouro') lista = lista.filter(p => p.estouro);
-    else if (filtroAtivo === 'atencao') lista = lista.filter(p => !p.estouro && p.percentual >= 80);
-    else if (filtroAtivo === 'ok') lista = lista.filter(p => !p.estouro && p.percentual < 80);
-    if (busca) lista = lista.filter(p => (p.nome||p.id).toLowerCase().includes(busca));
-
-    if (lista.length === 0) {
-      el.innerHTML = `<div class="empty-state"><div class="icon">📁</div><p>Nenhum projeto encontrado</p></div>`;
-      return;
-    }
-
-    el.innerHTML = lista.map(p => {
-      const classe = p.estouro ? 'alert' : p.percentual >= 80 ? 'warn' : 'ok';
-      const dotColor = p.estouro ? 'var(--danger)' : p.percentual >= 80 ? 'var(--warning)' : 'var(--success)';
-      const pct = Math.min(p.percentual, 150);
-      const barWidth = Math.min(pct, 100);
+    el.innerHTML = lista.map((p,idx)=>{
+      const cls = p.estouro?'alert':p.percentual>=80?'warn':'ok';
+      const bw = Math.min(p.percentual,100);
+      const cor = CORES[idx%CORES.length];
       const saldo = p.saldo;
+      const barColor = p.estouro?'var(--danger)':p.percentual>=80?'var(--warning)':'var(--accent)';
 
-      return `<div class="projeto-row ${p.estouro?'estouro':''}">
-        <div class="projeto-main" onclick="toggleDetalhe('${p.id}')">
-          <div class="projeto-nome">
-            <div class="status-dot" style="background:${dotColor};box-shadow:0 0 6px ${dotColor};"></div>
-            <span>${p.nome||p.id}</span>
+      return `<div class="proj-row ${p.estouro?'r-danger':''}">
+        <div class="proj-main" onclick="toggleDetalhe('${p.id}')">
+          <div class="proj-nome">
+            <div class="proj-avatar" style="background:${cor}22;color:${cor};border:1px solid ${cor}33;">${iniciais(p.nome||p.id)}</div>
+            <span class="proj-nome-text">${p.nome||p.id}</span>
           </div>
-          <div class="valor-cell muted">${fmt(p.total_orcado)}</div>
-          <div class="valor-cell ${classe}">${fmt(p.total_realizado)}</div>
-          <div class="valor-cell muted">${fmt(p.total_previsto)}</div>
-          <div class="progress-wrap">
-            <span class="progress-label ${classe}">${p.percentual}%${p.estouro?' ⚠️':''}</span>
-            <div class="progress-bar-bg"><div class="progress-bar ${classe}" style="width:${barWidth}%"></div></div>
+          <div class="vcell">${fmt(p.total_orcado)}</div>
+          <div class="vcell v${cls}">${fmt(p.total_realizado)}</div>
+          <div class="vcell">${fmt(p.total_previsto)}</div>
+          <div class="pct-wrap">
+            <span class="pct-lbl ${cls}">${p.percentual}%${p.estouro?' ⚠️':''}</span>
+            <div class="pct-bar-bg"><div class="pct-bar ${cls}" style="width:${bw}%"></div></div>
           </div>
-          <button class="expand-btn" id="expand-${p.id}">▾</button>
+          <button class="exp-btn" id="expand-${p.id}">▾</button>
         </div>
-        <div class="projeto-detalhe" id="detalhe-${p.id}">
-          <div class="detalhe-grid">
-            <div><div class="detalhe-label">Orçado BC</div><div class="detalhe-val muted">${fmt(p.orcado_bc)}</div></div>
-            <div><div class="detalhe-label">Change Request</div><div class="detalhe-val muted">${fmt(p.change_request)}</div></div>
-            <div><div class="detalhe-label">Total Orçado</div><div class="detalhe-val muted">${fmt(p.total_orcado)}</div></div>
-            <div><div class="detalhe-label">Total Realizado</div><div class="detalhe-val ${classe}">${fmt(p.total_realizado)}</div></div>
-            <div><div class="detalhe-label">Total Previsto</div><div class="detalhe-val muted">${fmt(p.total_previsto)}</div></div>
-            <div><div class="detalhe-label">Gasto Total</div><div class="detalhe-val ${classe}">${fmt(p.total_gasto)}</div></div>
-            <div><div class="detalhe-label">Saldo</div><div class="detalhe-val ${saldo>=0?'ok':'alert'}">${fmt(saldo)}</div></div>
-            <div><div class="detalhe-label">Utilização</div><div class="detalhe-val ${classe}">${p.percentual}%</div></div>
+        <div class="proj-detail" id="detalhe-${p.id}">
+          <div class="detail-grid">
+            <div><div class="dl">Orçado BC</div><div class="dv">${fmt(p.orcado_bc)}</div></div>
+            <div><div class="dl">Change Request</div><div class="dv">${fmt(p.change_request)}</div></div>
+            <div><div class="dl">Total Orçado</div><div class="dv">${fmt(p.total_orcado)}</div></div>
+            <div><div class="dl">Total Realizado</div><div class="dv ${cls}">${fmt(p.total_realizado)}</div></div>
+            <div><div class="dl">Total Previsto</div><div class="dv">${fmt(p.total_previsto)}</div></div>
+            <div><div class="dl">Gasto Total</div><div class="dv ${cls}">${fmt(p.total_gasto)}</div></div>
+            <div><div class="dl">Saldo</div><div class="dv ${saldo>=0?'ok':'alert'}">${fmt(saldo)}</div></div>
+            <div><div class="dl">Utilização</div><div class="dv ${cls}">${p.percentual}%</div></div>
           </div>
-          <div class="saldo-bar-wrap">
-            <div class="saldo-bar-label">Orçado x Utilizado</div>
-            <div class="saldo-bar-bg">
-              <div class="saldo-bar-fill ${classe}" style="width:${barWidth}%;background:${p.estouro?'var(--danger)':p.percentual>=80?'var(--warning)':'var(--success)'};"></div>
-              <div class="saldo-bar-limit" style="left:100%"></div>
+          <div class="uso-bar-wrap">
+            <div class="uso-bar-lbl">Orçado x Utilizado</div>
+            <div class="uso-bar-bg">
+              <div class="uso-bar-fill" style="width:${bw}%;background:${barColor};border-radius:3px;"></div>
+              <div class="uso-bar-mark" style="left:100%"></div>
             </div>
           </div>
-          ${renderTabelaMensal(p.previsto_mensal)}
+          ${renderMensal(p.previsto_mensal)}
         </div>
       </div>`;
     }).join('');
   }
 
   function toggleDetalhe(id) {
-    const detalhe = document.getElementById(`detalhe-${id}`);
+    const det = document.getElementById(`detalhe-${id}`);
     const btn = document.getElementById(`expand-${id}`);
-    const row = detalhe.closest('.projeto-row');
-    const isOpen = detalhe.classList.contains('open');
-    document.querySelectorAll('.projeto-detalhe.open').forEach(d => {
+    const row = det.closest('.proj-row');
+    const isOpen = det.classList.contains('open');
+    document.querySelectorAll('.proj-detail.open').forEach(d=>{
       const rid = d.id.replace('detalhe-','');
       d.classList.remove('open');
       document.getElementById(`expand-${rid}`)?.classList.remove('open');
-      d.closest('.projeto-row')?.classList.remove('open-row');
+      d.closest('.proj-row')?.classList.remove('r-open');
     });
-    if (!isOpen) { detalhe.classList.add('open'); btn.classList.add('open'); row.classList.add('open-row'); }
+    if (!isOpen){det.classList.add('open');btn.classList.add('open');row.classList.add('r-open');}
   }
 
   function filtrarTab(el, filtro) {
     filtroAtivo = filtro;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active','active-red','active-green'));
-    if (filtro === 'estouro') el.classList.add('active-red');
-    else if (filtro === 'ok') el.classList.add('active-green');
+    document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active','active-red','active-green'));
+    if (filtro==='estouro') el.classList.add('active-red');
+    else if (filtro==='ok') el.classList.add('active-green');
     else el.classList.add('active');
     renderProjetos();
   }
 
   carregarDados();
-  setInterval(carregarDados, 10 * 60 * 1000);
+  setInterval(carregarDados,10*60*1000);
 </script>
 </body>
 </html>
