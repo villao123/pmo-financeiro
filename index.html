@@ -344,13 +344,25 @@
     const btn = document.getElementById(`expand-${id}`);
     const row = det.closest('.proj-row');
     const isOpen = det.classList.contains('open');
+
+    // Fecha tudo e mostra todos
     document.querySelectorAll('.proj-detail.open').forEach(d=>{
       const rid = d.id.replace('detalhe-','');
       d.classList.remove('open');
       document.getElementById(`expand-${rid}`)?.classList.remove('open');
       d.closest('.proj-row')?.classList.remove('r-open');
     });
-    if (!isOpen){det.classList.add('open');btn.classList.add('open');row.classList.add('r-open');}
+    document.querySelectorAll('.proj-row').forEach(r=>r.style.display='');
+
+    if (!isOpen) {
+      // Abre o clicado e esconde os outros
+      det.classList.add('open');
+      btn.classList.add('open');
+      row.classList.add('r-open');
+      document.querySelectorAll('.proj-row').forEach(r=>{
+        if (r !== row) r.style.display='none';
+      });
+    }
   }
 
   function filtrarTab(el, filtro) {
