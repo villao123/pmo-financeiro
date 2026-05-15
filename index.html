@@ -92,10 +92,16 @@
   .dv.ok{color:#6ee7b7;}.dv.alert{color:#fca5a5;}.dv.warn{color:#fcd34d;}
 
   .uso-bar-wrap{padding:10px 0 14px;border-top:1px solid var(--border);}
-  .uso-bar-lbl{font-size:10px;color:var(--muted2);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
-  .uso-bar-bg{height:6px;background:var(--border2);border-radius:3px;position:relative;}
+  .uso-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .uso-bar-row:last-child{margin-bottom:0;}
+  .uso-bar-meta{display:flex;flex-direction:column;gap:2px;min-width:130px;}
+  .uso-bar-lbl{font-size:10px;color:var(--muted2);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;}
+  .uso-bar-pct{font-size:12px;font-weight:700;}
+  .uso-bar-track{flex:1;position:relative;}
+  .uso-bar-bg{height:6px;background:var(--border2);border-radius:3px;position:relative;overflow:visible;}
   .uso-bar-fill{height:6px;border-radius:3px;position:absolute;top:0;left:0;}
-  .uso-bar-mark{position:absolute;top:-3px;width:1px;height:12px;background:rgba(255,255,255,0.25);}
+  .uso-bar-mark{position:absolute;top:-3px;width:2px;height:12px;background:rgba(255,255,255,0.35);border-radius:1px;}
+  .uso-bar-overflow{position:absolute;top:0;left:100%;height:6px;border-radius:0 3px 3px 0;opacity:0.5;}
 
   .mensal-wrap{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
   .mensal-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;}
@@ -269,6 +275,8 @@
       const cor = CORES[idx%CORES.length];
       const saldo = p.saldo;
       const barColor = p.estouro?'var(--danger)':p.percentual>=80?'var(--warning)':'var(--accent)';
+      const pctGasto = p.total_orcado>0?Math.round((p.total_realizado/p.total_orcado)*100):0;
+      const gastoColor = pctGasto>100?'var(--danger)':pctGasto>=80?'var(--warning)':'#6366f1';
 
       return `<div class="proj-row ${p.estouro?'r-danger':''}">
         <div class="proj-main" onclick="toggleDetalhe('${p.id}')">
@@ -297,10 +305,30 @@
             <div><div class="dl">Utilização</div><div class="dv ${cls}">${p.percentual}%</div></div>
           </div>
           <div class="uso-bar-wrap">
-            <div class="uso-bar-lbl">Orçado x Utilizado</div>
-            <div class="uso-bar-bg">
-              <div class="uso-bar-fill" style="width:${bw}%;background:${barColor};border-radius:3px;"></div>
-              <div class="uso-bar-mark" style="left:100%"></div>
+            <div class="uso-bar-row">
+              <div class="uso-bar-meta">
+                <span class="uso-bar-lbl">Comprometido</span>
+                <span class="uso-bar-pct" style="color:${barColor};">${p.percentual}%${p.estouro?' ⚠️':''}</span>
+              </div>
+              <div class="uso-bar-track">
+                <div class="uso-bar-bg">
+                  <div class="uso-bar-fill" style="width:${Math.min(p.percentual,100)}%;background:${barColor};border-radius:3px;"></div>
+                  ${p.estouro?`<div class="uso-bar-overflow" style="width:${Math.min(p.percentual-100,30)}%;background:${barColor};"></div>`:''}
+                  <div class="uso-bar-mark" style="left:100%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="uso-bar-row">
+              <div class="uso-bar-meta">
+                <span class="uso-bar-lbl">Gasto</span>
+                <span class="uso-bar-pct" style="color:${gastoColor};">${pctGasto}%</span>
+              </div>
+              <div class="uso-bar-track">
+                <div class="uso-bar-bg">
+                  <div class="uso-bar-fill" style="width:${Math.min(pctGasto,100)}%;background:${gastoColor};border-radius:3px;opacity:0.85;"></div>
+                  <div class="uso-bar-mark" style="left:100%"></div>
+                </div>
+              </div>
             </div>
           </div>
           ${renderMensal(p.previsto_mensal)}
