@@ -187,7 +187,7 @@
       <div>Orçado Total</div>
       <div>Realizado</div>
       <div>Previsto</div>
-      <div>Utilização</div>
+      <div>Comprometido</div>
       <div></div>
     </div>
     <div id="proj-list"><div class="loading"><div class="spinner"></div>Buscando dados...</div></div>
@@ -302,7 +302,9 @@
             <div><div class="dl">Total Previsto</div><div class="dv">${fmt(p.total_previsto)}</div></div>
             <div><div class="dl">Gasto Total</div><div class="dv ${cls}">${fmt(p.total_gasto)}</div></div>
             <div><div class="dl">Saldo</div><div class="dv ${saldo>=0?'ok':'alert'}">${fmt(saldo)}</div></div>
-            <div><div class="dl">Utilização</div><div class="dv ${cls}">${p.percentual}%</div></div>
+            <div><div class="dl">Comprometido</div><div class="dv ${cls}">${p.percentual}%</div></div>
+            <div><div class="dl">Valor Comprometido</div><div class="dv ${cls}">${fmt(p.total_previsto)}</div></div>
+            <div><div class="dl">Valor Gasto</div><div class="dv ${pctGasto>=100?'alert':pctGasto>=80?'warn':'ok'}">${fmt(p.total_realizado)}</div></div>
           </div>
           <div class="uso-bar-wrap">
             <div class="uso-bar-row">
