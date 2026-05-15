@@ -300,7 +300,7 @@
             <div><div class="dl">Total Orçado</div><div class="dv">${fmt(p.total_orcado)}</div></div>
             <div><div class="dl">Total Realizado</div><div class="dv ${cls}">${fmt(p.total_realizado)}</div></div>
             <div><div class="dl">Total Previsto</div><div class="dv">${fmt(p.total_previsto)}</div></div>
-            <div><div class="dl">Gasto Total</div><div class="dv ${cls}">${fmt(p.total_gasto)}</div></div>
+            <div><div class="dl">Previsto + Realizado</div><div class="dv ${cls}">${fmt(p.total_gasto)}</div></div>
             <div><div class="dl">Saldo</div><div class="dv ${saldo>=0?'ok':'alert'}">${fmt(saldo)}</div></div>
             <div><div class="dl">Comprometido</div><div class="dv ${cls}">${p.percentual}%</div></div>
             <div><div class="dl">Valor Comprometido</div><div class="dv ${cls}">${fmt(p.total_previsto)}</div></div>
