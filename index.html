@@ -245,13 +245,29 @@
 
   function renderMensal(pm) {
     if (!pm||pm.length===0) return '';
-    const total = pm.reduce((s,m)=>s+(m.valor||0),0);
-    const linhas = pm.map(m=>{
+    const agora = new Date();
+    const anoAtual = agora.getFullYear();
+    const mesAtual = agora.getMonth() + 1;
+    const nomeMes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+    const pmFiltrado = pm.filter(m => {
+      const partes = m.mes.split('/');
+      if (partes.length < 2) return false;
+      const mesNome = partes[0].toLowerCase();
+      const ano = 2000 + parseInt(partes[1]);
+      const mes = nomeMes.indexOf(mesNome) + 1;
+      if (mes === 0) return false;
+      return (ano > anoAtual) || (ano === anoAtual && mes >= mesAtual);
+    });
+
+    if (pmFiltrado.length === 0) return '';
+    const total = pmFiltrado.reduce((s,m)=>s+(m.valor||0),0);
+    const linhas = pmFiltrado.map(m=>{
       const v = m.valor||0;
       return `<tr><td>${m.mes}</td><td class="${v===0?'vzero':'vpos'}">${fmt(v)}</td></tr>`;
     }).join('');
     return `<div class="mensal-wrap">
-      <div class="mensal-title">Projeção — Próximos 6 Meses</div>
+      <div class="mensal-title">Projeção — Mês Atual e Próximos</div>
       <table class="mensal-table">
         <thead><tr><th>Mês</th><th>Previsto</th></tr></thead>
         <tbody>${linhas}<tr><td>Total</td><td>${fmt(total)}</td></tr></tbody>
