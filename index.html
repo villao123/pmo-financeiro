@@ -231,8 +231,8 @@
   function atualizarStats() {
     const total = todosAlertas.length;
     const est = todosAlertas.filter(p=>p.estouro).length;
-    const at = todosAlertas.filter(p=>!p.estouro&&p.percentual>=80).length;
-    const ok = todosAlertas.filter(p=>!p.estouro&&p.percentual<80).length;
+    const at = todosAlertas.filter(p=>!p.estouro&&p.percentual<80).length;
+    const ok = todosAlertas.filter(p=>!p.estouro&&p.percentual>=80).length;
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-estouro').textContent = est;
     document.getElementById('stat-atencao').textContent = at;
@@ -280,17 +280,17 @@
     const busca = document.getElementById('busca').value.toLowerCase();
     let lista = [...todosAlertas];
     if (filtroAtivo==='estouro') lista=lista.filter(p=>p.estouro);
-    else if (filtroAtivo==='atencao') lista=lista.filter(p=>!p.estouro&&p.percentual>=80);
-    else if (filtroAtivo==='ok') lista=lista.filter(p=>!p.estouro&&p.percentual<80);
+    else if (filtroAtivo==='atencao') lista=lista.filter(p=>!p.estouro&&p.percentual<80);
+    else if (filtroAtivo==='ok') lista=lista.filter(p=>!p.estouro&&p.percentual>=80);
     if (busca) lista=lista.filter(p=>(p.nome||p.id).toLowerCase().includes(busca));
     if (lista.length===0){el.innerHTML=`<div class="empty">📁 Nenhum projeto encontrado</div>`;return;}
 
     el.innerHTML = lista.map((p,idx)=>{
-      const cls = p.estouro?'alert':p.percentual>=80?'warn':'ok';
+      const cls = p.estouro?'alert':p.percentual<80?'warn':'ok';
       const bw = Math.min(p.percentual,100);
       const cor = CORES[idx%CORES.length];
       const saldo = p.saldo;
-      const barColor = p.estouro?'var(--danger)':p.percentual>=80?'var(--warning)':'var(--accent)';
+      const barColor = p.estouro?'var(--danger)':p.percentual<80?'var(--warning)':'var(--accent)';
       const pctGasto = p.total_orcado>0?Math.round((p.total_realizado/p.total_orcado)*100):0;
       const gastoColor = pctGasto>100?'var(--danger)':pctGasto>=80?'var(--warning)':'#6366f1';
 
