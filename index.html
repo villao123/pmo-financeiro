@@ -119,6 +119,22 @@
   .spinner{width:24px;height:24px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
   @keyframes spin{to{transform:rotate(360deg);}}
 
+  .btn-arquivar{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+  .btn-arquivar:hover{border-color:var(--warning);color:var(--warning);}
+  .btn-desarquivar{border-color:rgba(0,229,160,0.4);color:var(--accent);}
+  .btn-desarquivar:hover{opacity:0.7;}
+
+  .finalizados-section{margin-top:24px;}
+  .finalizados-header{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background 0.1s;}
+  .finalizados-header:hover{background:var(--surface2);}
+  .finalizados-title{font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.08em;flex:1;}
+  .finalizados-toggle{font-size:12px;color:var(--muted2);transition:transform 0.2s;}
+  .finalizados-toggle.open{transform:rotate(180deg);}
+  .finalizados-body{display:none;margin-top:4px;}
+  .finalizados-body.open{display:block;}
+  .proj-row.finalizado{opacity:0.5;}
+  .proj-row.finalizado:hover{opacity:0.8;}
+
   @media(max-width:900px){
     .stats-row{grid-template-columns:repeat(2,1fr);}
     .tbl-head{display:none;}
@@ -192,6 +208,18 @@
     </div>
     <div id="proj-list"><div class="loading"><div class="spinner"></div>Buscando dados...</div></div>
   </div>
+  <div class="finalizados-section" id="finalizados-section" style="display:none;">
+    <div class="finalizados-header" onclick="toggleFinalizados()">
+      <span class="finalizados-title">📦 Projetos Finalizados <span id="badge-finalizados" style="font-size:10px;color:var(--muted);margin-left:6px;"></span></span>
+      <span class="finalizados-toggle" id="finalizados-toggle">▾</span>
+    </div>
+    <div class="finalizados-body" id="finalizados-body">
+      <div class="proj-table" style="margin-top:4px;">
+        <div class="tbl-head"><div>Projeto</div><div>Orçado Total</div><div>Realizado</div><div>Previsto</div><div>Comprometido</div><div></div></div>
+        <div id="finalizados-list"></div>
+      </div>
+    </div>
+  </div>
   <div style="height:48px;"></div>
 </div>
 
@@ -229,10 +257,12 @@
   }
 
   function atualizarStats() {
-    const total = todosAlertas.length;
-    const est = todosAlertas.filter(p=>p.estouro).length;
-    const at = todosAlertas.filter(p=>!p.estouro&&p.percentual<80).length;
-    const ok = todosAlertas.filter(p=>!p.estouro&&p.percentual>=80).length;
+    const ativos = todosAlertas.filter(p=>!p.finalizado);
+    const finalizados = todosAlertas.filter(p=>p.finalizado);
+    const total = ativos.length;
+    const est = ativos.filter(p=>p.estouro).length;
+    const at = ativos.filter(p=>!p.estouro&&p.percentual<80).length;
+    const ok = ativos.filter(p=>!p.estouro&&p.percentual>=80).length;
     document.getElementById('stat-total').textContent = total;
     document.getElementById('stat-estouro').textContent = est;
     document.getElementById('stat-atencao').textContent = at;
@@ -241,6 +271,36 @@
     document.getElementById('badge-estouro').textContent = est;
     document.getElementById('badge-atencao').textContent = at;
     document.getElementById('badge-ok').textContent = ok;
+    // Seção finalizados
+    const sec = document.getElementById('finalizados-section');
+    const badge = document.getElementById('badge-finalizados');
+    if (finalizados.length > 0) {
+      sec.style.display = '';
+      badge.textContent = finalizados.length + ' projeto(s)';
+      renderFinalizados(finalizados);
+    } else {
+      sec.style.display = 'none';
+    }
+  }
+
+  function toggleFinalizados() {
+    const body = document.getElementById('finalizados-body');
+    const toggle = document.getElementById('finalizados-toggle');
+    body.classList.toggle('open');
+    toggle.classList.toggle('open');
+  }
+
+  async function arquivar(id, finalizado) {
+    try {
+      await fetch(`${WORKER}/arquivar/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ finalizado })
+      });
+      await carregarDados();
+    } catch(e) {
+      alert('Erro ao arquivar projeto');
+    }
   }
 
   function renderMensal(pm) {
@@ -275,17 +335,8 @@
     </div>`;
   }
 
-  function renderProjetos() {
-    const el = document.getElementById('proj-list');
-    const busca = document.getElementById('busca').value.toLowerCase();
-    let lista = [...todosAlertas];
-    if (filtroAtivo==='estouro') lista=lista.filter(p=>p.estouro);
-    else if (filtroAtivo==='atencao') lista=lista.filter(p=>!p.estouro&&p.percentual<80);
-    else if (filtroAtivo==='ok') lista=lista.filter(p=>!p.estouro&&p.percentual>=80);
-    if (busca) lista=lista.filter(p=>(p.nome||p.id).toLowerCase().includes(busca));
-    if (lista.length===0){el.innerHTML=`<div class="empty">📁 Nenhum projeto encontrado</div>`;return;}
-
-    el.innerHTML = lista.map((p,idx)=>{
+  function renderLinhasProjeto(lista, comBotaoArquivar) {
+    return lista.map((p,idx)=>{
       const cls = p.estouro?'alert':p.percentual<80?'warn':'ok';
       const bw = Math.min(p.percentual,100);
       const cor = CORES[idx%CORES.length];
@@ -293,8 +344,11 @@
       const barColor = p.estouro?'var(--danger)':p.percentual<80?'var(--warning)':'var(--accent)';
       const pctGasto = p.total_orcado>0?Math.round((p.total_realizado/p.total_orcado)*100):0;
       const gastoColor = pctGasto>100?'var(--danger)':pctGasto>=80?'var(--warning)':'#6366f1';
+      const botaoArquivar = comBotaoArquivar
+        ? `<button class="btn-arquivar" onclick="event.stopPropagation();arquivar('${p.id}',true)" title="Mover para Finalizados">📦</button>`
+        : `<button class="btn-arquivar btn-desarquivar" onclick="event.stopPropagation();arquivar('${p.id}',false)" title="Reativar projeto">↩️</button>`;
 
-      return `<div class="proj-row ${p.estouro?'r-danger':''}">
+      return `<div class="proj-row ${p.estouro?'r-danger':''} ${p.finalizado?'finalizado':''}">
         <div class="proj-main" onclick="toggleDetalhe('${p.id}')">
           <div class="proj-nome">
             <div class="proj-avatar" style="background:${cor}22;color:${cor};border:1px solid ${cor}33;">${iniciais(p.nome||p.id)}</div>
@@ -307,7 +361,10 @@
             <span class="pct-lbl ${cls}">${p.percentual}%${p.estouro?' ⚠️':''}</span>
             <div class="pct-bar-bg"><div class="pct-bar ${cls}" style="width:${bw}%"></div></div>
           </div>
-          <button class="exp-btn" id="expand-${p.id}">▾</button>
+          <div style="display:flex;gap:4px;justify-content:center;">
+            ${botaoArquivar}
+            <button class="exp-btn" id="expand-${p.id}">▾</button>
+          </div>
         </div>
         <div class="proj-detail" id="detalhe-${p.id}">
           <div class="detail-grid">
@@ -353,6 +410,25 @@
         </div>
       </div>`;
     }).join('');
+  }
+
+  function renderFinalizados(lista) {
+    const el = document.getElementById('finalizados-list');
+    if (!el) return;
+    el.innerHTML = renderLinhasProjeto(lista, false);
+  }
+
+  function renderProjetos() {
+    const el = document.getElementById('proj-list');
+    const busca = document.getElementById('busca').value.toLowerCase();
+    let lista = todosAlertas.filter(p=>!p.finalizado);
+    if (filtroAtivo==='estouro') lista=lista.filter(p=>p.estouro);
+    else if (filtroAtivo==='atencao') lista=lista.filter(p=>!p.estouro&&p.percentual<80);
+    else if (filtroAtivo==='ok') lista=lista.filter(p=>!p.estouro&&p.percentual>=80);
+    if (busca) lista=lista.filter(p=>(p.nome||p.id).toLowerCase().includes(busca));
+    if (lista.length===0){el.innerHTML=`<div class="empty">📁 Nenhum projeto encontrado</div>`;return;}
+
+    el.innerHTML = renderLinhasProjeto(lista, true);
   }
 
   function toggleDetalhe(id) {
