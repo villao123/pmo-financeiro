@@ -208,18 +208,7 @@
     </div>
     <div id="proj-list"><div class="loading"><div class="spinner"></div>Buscando dados...</div></div>
   </div>
-  <div class="finalizados-section" id="finalizados-section" style="display:none;">
-    <div class="finalizados-header" onclick="toggleFinalizados()">
-      <span class="finalizados-title">📦 Projetos Finalizados <span id="badge-finalizados" style="font-size:10px;color:var(--muted);margin-left:6px;"></span></span>
-      <span class="finalizados-toggle" id="finalizados-toggle">▾</span>
-    </div>
-    <div class="finalizados-body" id="finalizados-body">
-      <div class="proj-table" style="margin-top:4px;">
-        <div class="tbl-head"><div>Projeto</div><div>Orçado Total</div><div>Realizado</div><div>Previsto</div><div>Comprometido</div><div></div></div>
-        <div id="finalizados-list"></div>
-      </div>
-    </div>
-  </div>
+
   <div style="height:48px;"></div>
 </div>
 
@@ -290,18 +279,7 @@
     toggle.classList.toggle('open');
   }
 
-  async function arquivar(id, finalizado) {
-    try {
-      await fetch(`${WORKER}/arquivar/${id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ finalizado })
-      });
-      await carregarDados();
-    } catch(e) {
-      alert('Erro ao arquivar projeto');
-    }
-  }
+
 
   function renderMensal(pm) {
     if (!pm||pm.length===0) return '';
@@ -335,7 +313,7 @@
     </div>`;
   }
 
-  function renderLinhasProjeto(lista, comBotaoArquivar) {
+  function renderLinhasProjeto(lista) {
     return lista.map((p,idx)=>{
       const cls = p.estouro?'alert':p.percentual<80?'warn':'ok';
       const bw = Math.min(p.percentual,100);
@@ -344,9 +322,7 @@
       const barColor = p.estouro?'var(--danger)':p.percentual<80?'var(--warning)':'var(--accent)';
       const pctGasto = p.total_orcado>0?Math.round((p.total_realizado/p.total_orcado)*100):0;
       const gastoColor = pctGasto>100?'var(--danger)':pctGasto>=80?'var(--warning)':'#6366f1';
-      const botaoArquivar = comBotaoArquivar
-        ? `<button class="btn-arquivar" onclick="event.stopPropagation();arquivar('${p.id}',true)" title="Mover para Finalizados">📦</button>`
-        : `<button class="btn-arquivar btn-desarquivar" onclick="event.stopPropagation();arquivar('${p.id}',false)" title="Reativar projeto">↩️</button>`;
+
 
       return `<div class="proj-row ${p.estouro?'r-danger':''} ${p.finalizado?'finalizado':''}">
         <div class="proj-main" onclick="toggleDetalhe('${p.id}')">
@@ -361,10 +337,7 @@
             <span class="pct-lbl ${cls}">${p.percentual}%${p.estouro?' ⚠️':''}</span>
             <div class="pct-bar-bg"><div class="pct-bar ${cls}" style="width:${bw}%"></div></div>
           </div>
-          <div style="display:flex;gap:4px;justify-content:center;">
-            ${botaoArquivar}
-            <button class="exp-btn" id="expand-${p.id}">▾</button>
-          </div>
+          <button class="exp-btn" id="expand-${p.id}">▾</button>
         </div>
         <div class="proj-detail" id="detalhe-${p.id}">
           <div class="detail-grid">
@@ -415,7 +388,7 @@
   function renderFinalizados(lista) {
     const el = document.getElementById('finalizados-list');
     if (!el) return;
-    el.innerHTML = renderLinhasProjeto(lista, false);
+    el.innerHTML = renderLinhasProjeto(lista);
   }
 
   function renderProjetos() {
@@ -428,7 +401,7 @@
     if (busca) lista=lista.filter(p=>(p.nome||p.id).toLowerCase().includes(busca));
     if (lista.length===0){el.innerHTML=`<div class="empty">📁 Nenhum projeto encontrado</div>`;return;}
 
-    el.innerHTML = renderLinhasProjeto(lista, true);
+    el.innerHTML = renderLinhasProjeto(lista);
   }
 
   function toggleDetalhe(id) {
