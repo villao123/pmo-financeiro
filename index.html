@@ -269,12 +269,14 @@
     // Seção finalizados
     const sec = document.getElementById('finalizados-section');
     const badge = document.getElementById('badge-finalizados');
-    if (finalizados.length > 0) {
-      sec.style.display = '';
-      badge.textContent = finalizados.length + ' projeto(s)';
-      renderFinalizados(finalizados);
-    } else {
-      sec.style.display = 'none';
+    if (sec) {
+      if (finalizados.length > 0) {
+        sec.style.display = '';
+        if (badge) badge.textContent = finalizados.length + ' projeto(s)';
+        renderFinalizados(finalizados);
+      } else {
+        sec.style.display = 'none';
+      }
     }
   }
 
