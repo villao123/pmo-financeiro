@@ -62,13 +62,16 @@
   .proj-row:last-child{border-bottom:none;}
   .proj-row.r-danger{border-left-color:var(--danger);}
   .proj-row.r-open{background:rgba(0,229,160,0.03)!important;border-left-color:var(--accent)!important;}
+  .proj-row.row-total{background:rgba(0,229,160,0.06)!important;border-left-color:var(--accent2)!important;border-top:2px solid var(--accent2);font-weight:700;}
   .proj-main{display:grid;grid-template-columns:2.5fr 1fr 1fr 1fr 130px 32px;align-items:center;padding:14px 20px;cursor:pointer;gap:12px;transition:background 0.1s;}
   .proj-main:hover{background:rgba(255,255,255,0.02);}
+  .proj-row.row-total .proj-main:hover{background:rgba(0,229,160,0.06);}
 
   .proj-nome{display:flex;align-items:center;gap:10px;min-width:0;}
   .proj-avatar{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;color:#fff;}
   .proj-nome-text{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .vcell{font-size:12px;font-weight:500;white-space:nowrap;color:var(--muted2);}
+  .row-total .vcell{color:var(--accent2);font-weight:700;}
   .vok{color:#6ee7b7;}.valert{color:#fca5a5;}.vwarn{color:#fcd34d;}
 
   .pct-wrap{display:flex;flex-direction:column;gap:3px;}
@@ -81,6 +84,7 @@
   .exp-btn{width:26px;height:26px;border-radius:5px;background:transparent;border:1px solid var(--border2);color:var(--muted2);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;justify-self:center;}
   .exp-btn:hover,.exp-btn.open{border-color:var(--accent);color:var(--accent);}
   .exp-btn.open{transform:rotate(180deg);}
+  .row-total .exp-btn{display:none;}
 
   .proj-detail{display:none;padding:0 20px 18px;border-top:1px solid var(--border);}
   .proj-detail.open{display:block;animation:sd 0.18s ease both;}
@@ -121,27 +125,16 @@
 
   .btn-arquivar{padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted2);font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
   .btn-arquivar:hover{border-color:var(--warning);color:var(--warning);}
-  .btn-desarquivar{border-color:rgba(0,229,160,0.4);color:var(--accent);}
-  .btn-desarquivar:hover{opacity:0.7;}
 
-  .finalizados-section{margin-top:24px;}
-  .finalizados-header{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:background 0.1s;}
-  .finalizados-header:hover{background:var(--surface2);}
-  .finalizados-title{font-size:12px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.08em;flex:1;}
-  .finalizados-toggle{font-size:12px;color:var(--muted2);transition:transform 0.2s;}
-  .finalizados-toggle.open{transform:rotate(180deg);}
-  .finalizados-body{display:none;margin-top:4px;}
-  .finalizados-body.open{display:block;}
-  .proj-row.finalizado{opacity:0.5;}
-  .proj-row.finalizado:hover{opacity:0.8;}
-
-  @media(max-width:900px){
+  @media(max-width:1024px){
     .stats-row{grid-template-columns:repeat(2,1fr);}
-    .tbl-head{display:none;}
-    .proj-main{grid-template-columns:1fr 32px;}
-    .vcell,.pct-wrap{display:none;}
-    .wrap{padding:0 14px;}
-    .header-center{display:none;}
+    .tbl-head,.proj-main{grid-template-columns:1.5fr 1fr 1fr 80px 32px;gap:8px;}
+  }
+  @media(max-width:640px){
+    .stats-row{grid-template-columns:1fr;}
+    .toolbar{flex-direction:column;align-items:flex-start;}
+    .tbl-head,.proj-main{grid-template-columns:1.5fr 1fr 80px;gap:6px;}
+    .proj-table{font-size:11px;}
   }
 </style>
 </head>
@@ -149,188 +142,146 @@
 <div class="wrap">
   <header>
     <div class="logo-area">
-      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAYAAACtWK6eAAAEUElEQVR4nO3d0W7bSBBFwfFi//+XlYdFsIITXVO2RHb3VD0FQawMmT4aUWDAj9vttoC/++fqBUBlAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBD8e/UCLnJ78Psfp66C8nYK5FEUj/6MWNgikCNhpJ8TysamX4N8N45XvwZNTQ3ktl472CLZ1MRA3jXMItnQtEDePcQi2cykQM4aXpFsZEogZw+tSDYxJZAriGQDEwK5clBFMlz3QCoMaIU18CbdA4G36hxIpXfuSmvhhboGUnEgK66JH+oaSFUiGaZjIIaQ03QMpDoBDyKQ9xDJEN0CMXicqlsgnYh5gE6BdBy4jmvmTqdAuhJJYwI5h0iaEggEAjmPXaShLoFMGa4px7GNLoFMIpJGBHINkTQhEAgEch27SAMCuZZIihPI9URSmEBqEElRAqlDJAUJpBaRFLPDE6a6ua2eT7Ua+dxHgdTUIZKju13rR9kJpK6KkfzkI2DLUFyD1FblmuSVj7SrckyHCKS+qwbqtl4bxufXbkEgPXhA0EUE0scZQ/uuHePR31WeQHp55xN8Wwzs2boE0uqbjzfzDPgTdQmEP/10sO0aBwikt+8OuDAOEkh/z+4E4nhCp0Bch2RfDb6PVN/QKRC+9iiAimG0eMNzL9Y89/c8VQyjlW47SIt3nSIqx9Hm37FbIBz3sWoOYsU1PdQxkFYn+CIfn35d5ZxVWcdhHQMhezSEV4fSLo61BDLNkSG8IpSWcazVN5C2J/yNnj0nZ4Ry9a71Y52/5vU15v9+MoT3P/uq89k6inudA+E/rxzGz691NJgxQXzWPZDdd5EzPiJtres1CIb3FBMC2XFQdjzmS0wIZK29BmanY73clEB2IY6TTQpk+vBMP76SJgWy1twhmnpc5U0LZK15wzTteFqZGMhaM4aq/W0aE0wNZC3DxQtMDmStnpHYOQqZHshavYat01q3sEMga/UYvA5r3M4ugaxVewArr21r3e/mfdbvQaxyB7AwittpB7lXYTArrIEv7LaD3LtqNxFGI7vuIPfOGlhf3za08w5y7x3/L/vR69OIQP70qlhEMYBAsmdiEcRAAjlOABtykQ6BQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAS/ACIoap+5AdaTAAAAAElFTkSuQmCC" style="width:36px;height:36px;object-fit:contain;" alt="Grupo DB">
+      <svg class="logo-svg" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect fill="currentColor" x="4" y="8" width="10" height="16" rx="2"/><rect fill="currentColor" x="18" y="4" width="10" height="20" rx="2"/></svg>
       <div>
-        <div class="logo-name">Grupo DB</div>
-        <div class="logo-sub">PMO · Financeiro</div>
+        <div class="logo-name">Financeiro PMO</div>
+        <div class="logo-sub">Grupo DB</div>
       </div>
     </div>
-    <div class="header-center">Monitoramento Financeiro de Projetos</div>
+    <div class="header-center">Monitoramento Orçamentário</div>
     <div class="header-right">
-      <div class="sync-pill"><div class="dot"></div>Sync: <span id="ultima-sync">—</span></div>
-      <button class="btn-refresh" onclick="carregarDados()">🔄 Atualizar</button>
+      <div class="sync-pill">
+        <div class="dot"></div>
+        <span id="sync-status">Sincronizando...</span>
+      </div>
+      <button class="btn-refresh" onclick="carregarDados()">↻ Atualizar</button>
     </div>
   </header>
 
-  <div class="stats-row">
-    <div class="stat-card s-total">
-      <div class="stat-num" id="stat-total">—</div>
-      <div class="stat-lbl">Projetos monitorados</div>
-    </div>
-    <div class="stat-card s-danger">
-      <div class="stat-num" id="stat-estouro">—</div>
-      <div class="stat-lbl">Com estouro</div>
-    </div>
-    <div class="stat-card s-warn">
-      <div class="stat-num" id="stat-atencao">—</div>
-      <div class="stat-lbl">Atenção &lt; 80%</div>
-    </div>
-    <div class="stat-card s-ok">
-      <div class="stat-num" id="stat-ok">—</div>
-      <div class="stat-lbl">Saudáveis</div>
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="toolbar">
+    <div class="section-title">Visão de Projetos <span class="count-badge" id="count-total">0</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="ftab active" onclick="filtrarTab(this,'todos')">Todos</button>
+      <button class="ftab" onclick="filtrarTab(this,'estouro')">Estouro ⚠️</button>
+      <button class="ftab" onclick="filtrarTab(this,'atencao')">Atenção 📋</button>
+      <button class="ftab" onclick="filtrarTab(this,'ok')">OK ✓</button>
     </div>
   </div>
 
-  <div class="toolbar">
-    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-      <div class="section-title">Projetos <span class="count-badge" id="badge-todos">0</span></div>
-      <div class="filter-tabs">
-        <button class="ftab active" onclick="filtrarTab(this,'todos')">Todos</button>
-        <button class="ftab" onclick="filtrarTab(this,'estouro')">Estouro <span id="badge-estouro">0</span></button>
-        <button class="ftab" onclick="filtrarTab(this,'atencao')">Atenção <span id="badge-atencao">0</span></button>
-        <button class="ftab" onclick="filtrarTab(this,'ok')">Saudável <span id="badge-ok">0</span></button>
-      </div>
-    </div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
     <div class="search-wrap">
-      <span style="color:var(--muted);font-size:12px;">🔍</span>
-      <input type="text" placeholder="Buscar projeto..." id="busca" oninput="renderProjetos()">
+      <span>🔍</span>
+      <input type="text" id="busca" placeholder="Buscar projeto..." onkeyup="renderProjetos()">
     </div>
   </div>
 
   <div class="proj-table">
     <div class="tbl-head">
-      <div>Projeto</div>
-      <div>Orçado Total</div>
-      <div>Realizado</div>
-      <div>Previsto</div>
-      <div>Comprometido</div>
-      <div></div>
+      <span>Projeto</span>
+      <span>Orçado</span>
+      <span>Realizado</span>
+      <span>Previsto</span>
+      <span>Comprometimento</span>
+      <span></span>
     </div>
-    <div id="proj-list"><div class="loading"><div class="spinner"></div>Buscando dados...</div></div>
+    <div id="proj-list"></div>
   </div>
 
-  <div style="height:48px;"></div>
+  <div style="margin-top:32px;">
+    <div class="section-title">Projetos Finalizados <span class="count-badge" id="count-finalizados">0</span></div>
+    <div class="proj-table" style="margin-top:12px;">
+      <div class="tbl-head">
+        <span>Projeto</span>
+        <span>Orçado</span>
+        <span>Realizado</span>
+        <span>Previsto</span>
+        <span>Comprometimento</span>
+        <span></span>
+      </div>
+      <div id="finalizados-list"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-  const WORKER = 'https://pmo-financeiro.vitormanu-dl05.workers.dev';
+  const API_URL = 'https://pmo-financeiro.vitormanu-dl05.workers.dev';
   let todosAlertas = [];
   let filtroAtivo = 'todos';
-  const CORES = ['#00b5ae','#6366f1','#f59e0b','#ec4899','#8b5cf6','#0891b2','#10b981','#f97316','#06b6d4','#84cc16'];
 
-  function iniciais(nome) {
-    const p = (nome||'').replace('Projeto ','').split(' ');
-    return ((p[0]||'')[0]||'') + ((p[1]||'')[0]||'');
+  function fmt(v) {
+    if (!v) return 'R$ 0';
+    return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
-  function fmt(val) {
-    if (!val && val !== 0) return 'R$ —';
-    return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(val);
+  function iniciais(s) {
+    return s.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,3);
   }
 
   async function carregarDados() {
-    document.getElementById('proj-list').innerHTML = `<div class="loading"><div class="spinner"></div>Buscando dados...</div>`;
+    document.getElementById('sync-status').textContent = 'Sincronizando...';
     try {
-      const ar = await fetch(`${WORKER}/alertas`);
-      todosAlertas = await ar.json();
-      atualizarStats();
+      const resp = await fetch(API_URL);
+      if (!resp.ok) throw new Error('Erro na requisição');
+      const dados = await resp.json();
+      todosAlertas = dados.projetos || [];
+      document.getElementById('sync-status').textContent = 'Sincronizado';
+      renderStats();
       renderProjetos();
-    } catch(e) {
-      console.error('Erro ao carregar alertas:', e);
-      document.getElementById('proj-list').innerHTML = `<div class="empty">❌ Erro ao conectar. Execute a macro no Excel para sincronizar.</div>`;
-    }
-    try {
-      const sr = await fetch(`${WORKER}/sync-info`);
-      const si = await sr.json();
-      if (si.ultima_sync) {
-        const d = new Date(si.ultima_sync);
-        document.getElementById('ultima-sync').textContent = d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      }
-    } catch(e) {
-      console.error('Erro ao carregar sync-info:', e);
+      renderFinalizados(todosAlertas.filter(p=>p.finalizado));
+    } catch (e) {
+      console.error('Erro:', e);
+      document.getElementById('sync-status').textContent = 'Erro na sincronização';
     }
   }
 
-  function atualizarStats() {
-    const ativos = todosAlertas.filter(p=>!p.finalizado);
-    const finalizados = todosAlertas.filter(p=>p.finalizado);
-    const total = ativos.length;
-    const est = ativos.filter(p=>p.estouro).length;
-    const at = ativos.filter(p=>!p.estouro&&p.percentual<80).length;
-    const ok = ativos.filter(p=>!p.estouro&&p.percentual>=80).length;
-    document.getElementById('stat-total').textContent = total;
-    document.getElementById('stat-estouro').textContent = est;
-    document.getElementById('stat-atencao').textContent = at;
-    document.getElementById('stat-ok').textContent = ok;
-    document.getElementById('badge-todos').textContent = total;
-    document.getElementById('badge-estouro').textContent = est;
-    document.getElementById('badge-atencao').textContent = at;
-    document.getElementById('badge-ok').textContent = ok;
-    // Seção finalizados
-    const sec = document.getElementById('finalizados-section');
-    const badge = document.getElementById('badge-finalizados');
-    if (sec) {
-      if (finalizados.length > 0) {
-        sec.style.display = '';
-        if (badge) badge.textContent = finalizados.length + ' projeto(s)';
-        renderFinalizados(finalizados);
-      } else {
-        sec.style.display = 'none';
-      }
-    }
+  function renderStats() {
+    const totalOrcado = todosAlertas.reduce((s,p)=>s+(p.total_orcado||0),0);
+    const totalRealizado = todosAlertas.reduce((s,p)=>s+(p.total_realizado||0),0);
+    const totalPrevisto = todosAlertas.reduce((s,p)=>s+(p.total_previsto||0),0);
+    const totalGasto = totalRealizado + totalPrevisto;
+    const pctGeral = totalOrcado>0 ? Math.round((totalGasto/totalOrcado)*100) : 0;
+
+    const html = `
+      <div class="stat-card s-total">
+        <div class="stat-num">${fmt(totalOrcado)}</div>
+        <div class="stat-lbl">Total Orçado</div>
+      </div>
+      <div class="stat-card s-ok">
+        <div class="stat-num">${fmt(totalRealizado)}</div>
+        <div class="stat-lbl">Total Realizado</div>
+      </div>
+      <div class="stat-card s-warn">
+        <div class="stat-num">${fmt(totalPrevisto)}</div>
+        <div class="stat-lbl">Total Previsto</div>
+      </div>
+      <div class="stat-card ${pctGeral>100?'s-danger':pctGeral>=80?'s-warn':'s-ok'}">
+        <div class="stat-num">${pctGeral}%</div>
+        <div class="stat-lbl">Comprometimento Geral</div>
+      </div>
+    `;
+    document.getElementById('stats-row').innerHTML = html;
   }
 
-  function toggleFinalizados() {
-    const body = document.getElementById('finalizados-body');
-    const toggle = document.getElementById('finalizados-toggle');
-    body.classList.toggle('open');
-    toggle.classList.toggle('open');
-  }
-
-
-
-  function renderMensal(pm) {
-    if (!pm||pm.length===0) return '';
-    const agora = new Date();
-    const anoAtual = agora.getFullYear();
-    const mesAtual = agora.getMonth() + 1;
-    const nomeMes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-
-    const pmFiltrado = pm.filter(m => {
-      const partes = m.mes.split('/');
-      if (partes.length < 2) return false;
-      const mesNome = partes[0].toLowerCase();
-      const ano = 2000 + parseInt(partes[1]);
-      const mes = nomeMes.indexOf(mesNome) + 1;
-      if (mes === 0) return false;
-      return (ano > anoAtual) || (ano === anoAtual && mes >= mesAtual);
-    });
-
-    if (pmFiltrado.length === 0) return '';
-    const total = pmFiltrado.reduce((s,m)=>s+(m.valor||0),0);
-    const linhas = pmFiltrado.map(m=>{
-      const v = m.valor||0;
-      return `<tr><td>${m.mes}</td><td class="${v===0?'vzero':'vpos'}">${fmt(v)}</td></tr>`;
-    }).join('');
-    return `<div class="mensal-wrap">
-      <div class="mensal-title">Projeção — Mês Atual e Próximos</div>
-      <table class="mensal-table">
-        <thead><tr><th>Mês</th><th>Previsto</th></tr></thead>
-        <tbody>${linhas}<tr><td>Total</td><td>${fmt(total)}</td></tr></tbody>
-      </table>
-    </div>`;
+  function calcularTotais(lista) {
+    return {
+      totalOrcado: lista.reduce((s,p)=>s+(p.total_orcado||0),0),
+      totalRealizado: lista.reduce((s,p)=>s+(p.total_realizado||0),0),
+      totalPrevisto: lista.reduce((s,p)=>s+(p.total_previsto||0),0),
+    };
   }
 
   function renderLinhasProjeto(lista) {
-    return lista.map((p,idx)=>{
-      const cls = p.estouro?'alert':p.percentual<80?'warn':'ok';
+    const totais = calcularTotais(lista);
+    const html = lista.map(p=>{
+      const cor = Math.floor(Math.random()*360);
+      const saldo = (p.total_orcado||0) - ((p.total_realizado||0) + (p.total_previsto||0));
+      const cls = p.estouro?'alert':p.percentual>=80?'ok':'warn';
       const bw = Math.min(p.percentual,100);
-      const cor = CORES[idx%CORES.length];
-      const saldo = p.saldo;
-      const barColor = p.estouro?'var(--danger)':p.percentual<80?'var(--warning)':'var(--accent)';
-      const pctGasto = p.total_orcado>0?Math.round((p.total_realizado/p.total_orcado)*100):0;
+      const barColor = p.estouro?'var(--danger)':p.percentual>=80?'var(--accent)':'var(--warning)';
+      const pctGasto = p.total_orcado>0 ? Math.round((p.total_realizado/p.total_orcado)*100) : 0;
       const gastoColor = pctGasto>100?'var(--danger)':pctGasto>=80?'var(--warning)':'#6366f1';
-
 
       return `<div class="proj-row ${p.estouro?'r-danger':''} ${p.finalizado?'finalizado':''}">
         <div class="proj-main" onclick="toggleDetalhe('${p.id}')">
@@ -387,10 +338,29 @@
               </div>
             </div>
           </div>
-          ${renderMensal(p.previsto_mensal)}
         </div>
       </div>`;
     }).join('');
+
+    // Linha de TOTAL
+    const pctTotal = totais.totalOrcado > 0 ? Math.round(((totais.totalRealizado + totais.totalPrevisto) / totais.totalOrcado) * 100) : 0;
+    const totalHtml = `<div class="proj-row row-total">
+      <div class="proj-main" style="pointer-events:none;">
+        <div class="proj-nome">
+          <span class="proj-nome-text" style="font-weight:700;">TOTAL CONSOLIDADO</span>
+        </div>
+        <div class="vcell">${fmt(totais.totalOrcado)}</div>
+        <div class="vcell">${fmt(totais.totalRealizado)}</div>
+        <div class="vcell">${fmt(totais.totalPrevisto)}</div>
+        <div class="pct-wrap">
+          <span class="pct-lbl ok">${pctTotal}%</span>
+          <div class="pct-bar-bg"><div class="pct-bar ok" style="width:${Math.min(pctTotal,100)}%"></div></div>
+        </div>
+        <div></div>
+      </div>
+    </div>`;
+
+    return html + totalHtml;
   }
 
   function renderFinalizados(lista) {
@@ -407,6 +377,9 @@
     else if (filtroAtivo==='atencao') lista=lista.filter(p=>!p.estouro&&p.percentual<80);
     else if (filtroAtivo==='ok') lista=lista.filter(p=>!p.estouro&&p.percentual>=80);
     if (busca) lista=lista.filter(p=>(p.nome||p.id).toLowerCase().includes(busca));
+    
+    document.getElementById('count-total').textContent = lista.length;
+    
     if (lista.length===0){el.innerHTML=`<div class="empty">📁 Nenhum projeto encontrado</div>`;return;}
 
     el.innerHTML = renderLinhasProjeto(lista);
@@ -418,7 +391,6 @@
     const row = det.closest('.proj-row');
     const isOpen = det.classList.contains('open');
 
-    // Fecha tudo e mostra todos
     document.querySelectorAll('.proj-detail.open').forEach(d=>{
       const rid = d.id.replace('detalhe-','');
       d.classList.remove('open');
@@ -428,7 +400,6 @@
     document.querySelectorAll('.proj-row').forEach(r=>r.style.display='');
 
     if (!isOpen) {
-      // Abre o clicado e esconde os outros
       det.classList.add('open');
       btn.classList.add('open');
       row.classList.add('r-open');
