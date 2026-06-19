@@ -222,10 +222,9 @@
   async function carregarDados() {
     document.getElementById('sync-status').textContent = 'Sincronizando...';
     try {
-      const resp = await fetch(API_URL);
+      const resp = await fetch(`${API_URL}/alertas`);
       if (!resp.ok) throw new Error('Erro na requisição');
-      const dados = await resp.json();
-      todosAlertas = dados.projetos || [];
+      todosAlertas = await resp.json();
       document.getElementById('sync-status').textContent = 'Sincronizado';
       renderStats();
       renderProjetos();
